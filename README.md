@@ -5,13 +5,14 @@ We will grow the code base as we implement different requirements.
 ## step 1.
 
 Fork This repo.
-After, clone it on your computer.
 https://github.com/EugenePeter/flickme-backend-API.git
 
 ## step 2
 
 **Clone this on your computer**
+Clone it on your computer.
 After forking it, go to your own copy of the repo on your github account.
+
 Click the **code** button, then download zip
 
 ## step 3
