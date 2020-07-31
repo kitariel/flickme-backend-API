@@ -7,12 +7,15 @@ router.use(cors());
 const userController = require("../controllers/users-controller");
 
 /* GET home page. */
-router.get("/", function (req, res, next) {
-  res.render("index", { title: "Express" });
-});
 
-router.post("/createUsers", userController.apiCreateUsers);
+router.post("/createUsers", userController.apiCreate);
+router.post("/updateUser", userController.apiUpdateUser);
 
-router.get("/users", userController.apiGetUsers);
+router.get("/userInfo", userController.apiUserGet);
+router.get("/userAll", userController.apiGetAll);
+
+router.delete("/userDeleteById", userController.apiUserDelete);
+
+router.get("/apiUserChecker" , userController.apiUserChecker)
 
 module.exports = router;

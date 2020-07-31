@@ -1,12 +1,17 @@
+## **This is our starting code base with basic MVC**
+
+We will grow the code base as we implement different requirements.
+
 ## step 1.
 
 Fork This repo.
-After, clone it on your computer.
 https://github.com/EugenePeter/flickme-backend-API.git
 
 ## step 2
 
-** Clone this on your computer**
+**Clone this on your computer**
+After forking it, go to your own copy of the repo on your github account.
+
 Click the **code** button, then download zip
 
 ## step 3
@@ -69,3 +74,7 @@ Go to the original repo
 ## Step 13
 
 Click **create pull request** button, add appropriate message, explain what you added removed or changed. Finally, click the create **pull request** button
+
+## Note
+
+After cloning the repo add your own bin folder and config files as well as the .env config
