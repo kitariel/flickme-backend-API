@@ -63,4 +63,4 @@ Go to the original repo
 
 ## Step 11
 
-Click **create pull request** button, add appropriate message then click the create **pull request** button
+Click **create pull request** button, add appropriate message, explain what you added removed or changed. Finally, click the create **pull request** button
