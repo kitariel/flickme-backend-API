@@ -6,7 +6,7 @@ https://github.com/EugenePeter/flickme-backend-API.git
 
 ## step 2
 
-** Clone this on your computer**
+**Clone this on your computer**
 Click the **code** button, then download zip
 
 ## step 3
