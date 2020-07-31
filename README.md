@@ -1,3 +1,7 @@
+## **This is our starting code base with basic MVC**
+
+We will grow the code base as we implement different requirements.
+
 ## step 1.
 
 Fork This repo.
