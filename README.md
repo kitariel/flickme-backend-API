@@ -27,6 +27,7 @@ npm run start
 Go through the whole code, project file and decide what you want to add, update or change in the code.
 
 Notify everyone what you want to work with and where in the code you want to add, update or remove.
+You can also add new files with new codes.
 
 ## step 7.
 
