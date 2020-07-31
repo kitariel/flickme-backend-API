@@ -21,43 +21,40 @@ const resultIfExist = await isExist.isUserExist()
 
 exports.apiGetAll = async (req , res) => {
   let user = new Users(req.body = null)
-  res.json(await user.getAll)
+  res.json(await user.getAll())
 }
 
 
-exports.apiUserGet = (req , res) => {
+exports.apiUserGet = async (req , res) => {
   // console.log(req.query.id)// query or params debug mode
-let getUserId = new Users(req.query.id)
-  getUserId.getUserById()
-  .then(result => res.json(result))
-  .catch(err => console.log(err))
+  let getUserId = new Users(req.query.id)
+    const result = await getUserId.getUserById()
+    res.json(result)
 }
 
-exports.apiUpdateUser = (req , res) => {
+exports.apiUpdateUser = async (req , res) => {
   let userObject = {
       username:req.body.username,
       room_id:req.body.room_id,
       isOnline:true
   }
-  let userUpdate = new Users(req.params.getUserId ,userObject)
-  userUpdate.userUpdateById()
-  .then(result => res.json(result))
-  .catch(err => console.log(err))    
+  // console.log(userObject , req.query.id)// query or params debug mode
+  let userUpdate = new Users(req.query.id ,userObject)
+  const result = await userUpdate.userUpdateById()
+  res.json(result)
 }
 
-exports.apiUserDelete = (req , res) => {
-  let user_id = req.params.getUserId;
-  let userUpdate = new Users( user_id)
-  userUpdate.userDeleteById()
-  .then(result => res.json(result))
-  .catch(err => console.log(err)) 
+exports.apiUserDelete = async (req , res) => {
+  let user_id = req.query.id;
+  let userUpdate = new Users(user_id)
+  const result = await userUpdate.userDeleteById()
+  res.json(result)
 }
 
-exports.apiUserChecker = (req , res) =>{
+exports.apiUserChecker = async (req , res) =>{
   let userUpdate = new Users(req.query.username)
-  userUpdate.isUserExist()
-  .then(result => res.json(result))
-  .catch(err => console.log(err)) 
+  const result = await userUpdate.isUserExist()
+  res.json(result)
 }
 
 
