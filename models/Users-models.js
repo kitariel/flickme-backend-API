@@ -6,10 +6,15 @@ const roomsCollection = r.db("chat_app").table("rooms");
 const formatMessage = require("../socket-io_utils/message");
 const { userJoin, getCurrentUser } = require("../socket-io_utils/user");
 
+const HelloMe = "Hello Me"
+
 let Users = function (data) {
   this.data = data;
 };
 
+
+
+//Hello
 // Users.prototype.create = function () {
 //   return new Promise(async (resolve, reject) => {
 //     try {
