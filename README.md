@@ -41,7 +41,7 @@ After you are satisfied with your code run these git commands:
 
 - **git add -A**
 
-- **git commit -m 'Your message for everyone here'**
+- **git commit -m 'Your message for everyone here / Concisely explain what you added removed or changed'**
 
 - **git push origin master**
 
