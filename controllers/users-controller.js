@@ -1,31 +1,63 @@
 let Users = require("../models/Users-models");
+const User = require("../models/Users-models");
 
-const dotenv = require("dotenv");
-dotenv.config();
+exports.apiCreate = async (req , res) => {
+let createUser = new Users(req.body)
+let isExist = new User(req.body.username)
+const resultIfExist = await isExist.isUserExist()
 
-exports.apiCreateUsers = function (req, res) {
-  let users = new Users(req.body);
-  users
-    .create()
-    .then(() => {
-      res.json("succesfully added user");
-    })
-    .catch((e) => {
-      res.json(e);
-      console.log(e);
-    });
-};
-
-exports.apiGetUsers = async function (req, res) {
-  try {
-    let users = new Users(req.body);
-    // const result = await postCollection.run(connection);
-    // res.json(result._responses[0].r);
-
-    users.getUsers().then((results) => {
-      res.json(results);
-    });
-  } catch (e) {
-    res.json("error");
+  if(!resultIfExist){
+    const result = await createUser.create().catch(err => console.log(err))    
+    if(result.success){
+        res.json(result)
+    }else{
+        res.json(result.message , result.error)
+    }
+  }else{
+    res.json('User Exist')
   }
-};
+
+}
+
+exports.apiGetAll = async (req , res) => {
+  let user = new Users(req.body = null)
+  res.json(await user.getAll)
+}
+
+
+exports.apiUserGet = (req , res) => {
+  // console.log(req.query.id)// query or params debug mode
+let getUserId = new Users(req.query.id)
+  getUserId.getUserById()
+  .then(result => res.json(result))
+  .catch(err => console.log(err))
+}
+
+exports.apiUpdateUser = (req , res) => {
+  let userObject = {
+      username:req.body.username,
+      room_id:req.body.room_id,
+      isOnline:true
+  }
+  let userUpdate = new Users(req.params.getUserId ,userObject)
+  userUpdate.userUpdateById()
+  .then(result => res.json(result))
+  .catch(err => console.log(err))    
+}
+
+exports.apiUserDelete = (req , res) => {
+  let user_id = req.params.getUserId;
+  let userUpdate = new Users( user_id)
+  userUpdate.userDeleteById()
+  .then(result => res.json(result))
+  .catch(err => console.log(err)) 
+}
+
+exports.apiUserChecker = (req , res) =>{
+  let userUpdate = new Users(req.query.username)
+  userUpdate.isUserExist()
+  .then(result => res.json(result))
+  .catch(err => console.log(err)) 
+}
+
+

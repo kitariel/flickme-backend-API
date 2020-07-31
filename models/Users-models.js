@@ -1,99 +1,151 @@
-r = require("rethinkdb");
-const io = require("../io");
+const r = require("rethinkdb");
+const usersCollection = r.table("users");
 
-const usersCollection = r.db("chat_app").table("users");
-const roomsCollection = r.db("chat_app").table("rooms");
-const formatMessage = require("../socket-io_utils/message");
-const { userJoin, getCurrentUser } = require("../socket-io_utils/user");
-
-const HelloMe = "Hello Me"
-
-let Users = function (data) {
-  this.data = data;
-};
-
-
-
-//Hello
-// Users.prototype.create = function () {
-//   return new Promise(async (resolve, reject) => {
-//     try {
-//       await usersCollection.insert(this.data).run(connection);
-//       console.log(this.data);
-//       resolve("succesfully added users");
-//     } catch (e) {
-//       console.log(e);
-//       reject(e);
-//     }
-//   });
-// };
-
-// const onlineUsers = this.data.username;
-
-const moderator = "chatbot";
-
-Users.prototype.create = async function () {
-  try {
-    const results = await usersCollection.insert(this.data).run(connection);
-    console.log(this.data);
-
-    io.on("connection", (socket) => {
-      console.log("new web socket comnnection");
-
-      socket.on("joinRoom", ({ username, room }) => {
-        const user = userJoin(socket.id, username, room);
-
-        socket.join(user.room);
-
-        // Welcome current user
-        socket.emit("chatFromServer", formatMessage(moderator, "Welcome"));
-
-        // Broadcast when a user conencts
-        socket.broadcast
-          .to(user.room)
-          .emit(
-            "chatFromServer",
-            formatMessage(moderator, `${user.username} has joined the chat`)
-          );
-      });
-
-      // Listen for chat message from client
-      socket.on("chatFromClient", (message) => {
-        console.log(message);
-        const user = getCurrentUser(socket.id);
-        const fromUser = user.username;
-        socket.broadcast
-          .to(user.room)
-          .emit("chatFromServer", formatMessage(fromUser, message));
-      });
-
-      // This runs when client disconnect
-      socket.on("disconnect", () => {
-        io.emit(
-          "chatFromServer",
-          formatMessage(moderator, "A user has left the chat")
-        );
-      });
-    });
-
-    return results;
-  } catch (e) {
-    console.log(e);
+class User{
+  constructor(data , dataObject = null){
+    this.data = data
+    this.dataObject = dataObject
   }
-};
 
-Users.prototype.getUsers = async function () {
-  try {
-    const results = await usersCollection.run(connection);
-    // console.log("success");
-    const getUser = results._responses[0].r;
+  //User Create
+  async create(){
+    let dataresult = {
+      'success': false,
+      'message': "Failed",
+    };
+    try{
 
-    if (getUser) {
-      return getUser;
+      if(this.data.username != ""){
+        const addUser = await usersCollection.insert(this.data).run(connection)
+
+        let userId = "";
+        userId = addUser.generated_keys.toString()
+
+        dataresult = {
+            'success': true,
+            'message': "User Created",
+            'data':userId
+      };
+    }      
+    }catch(e){
+      console.log(e)
+      return dataresult = {
+        'success': false,
+        'message': "Api Fail",
+        'error':e
+      };
     }
-  } catch (e) {
-    return "There was an error";
+      return dataresult       
   }
-};
 
-module.exports = Users;
+  //User Get By Id
+  async getUserById(){
+    let dataresult = {
+      'success': false,
+      'message': "Failed",
+    };
+    console.log(this.data)
+    try{
+
+      if(this.data.id != "" || this.data.id != undefined ){
+        const getUserInfo = await usersCollection.get(this.data).run(connection)
+        dataresult = {
+            'success': true,
+            'message': "Successful",
+            'data': getUserInfo
+      };
+    }      
+    }catch(e){
+      console.log(e)
+    }
+      return dataresult       
+  }
+
+  //User All
+  async getAll(){
+    let dataresult = {
+      'success': false,
+      'message': "Failed",
+    };
+    try{
+        const getall = await usersCollection.run(connection)
+        dataresult = {
+            'success': true,
+            'message': "Successful",
+            'data': getall
+    }      
+    }catch(e){
+      console.log(e)
+    }
+      return dataresult       
+  }
+
+   //User Update
+   async userUpdateById(){
+    let dataresult = {
+      'success': false,
+      'message': "Failed",
+    };
+    try{
+      if(this.data.user_Id != "" || this.data.user_Id != undefined ){
+        const updateUser = await usersCollection.get(this.data)
+        .update(this.dataObject)
+        .run(connection)
+        .catch(error => console.log(error));
+
+        dataresult = {
+            'success': true,
+            'message': "User Updated",
+      };
+    }      
+    }catch(e){
+      console.log(e)
+    }
+      return dataresult       
+  } 
+
+   //User Delete
+   async userDeleteById(){
+    let dataresult = {
+      'success': false,
+      'message': "Failed",
+    };
+    try{
+      if(this.data.user_Id != "" || this.data.user_Id != undefined ){
+        const deleteUser = await usersCollection.get(this.data)
+        .delete()
+        .run(connection)
+        .catch(error => console.log(error));
+
+        dataresult = {
+            'success': true,
+            'message': "User Deleted",
+        };
+     }      
+    }catch(e){
+      console.log(e)
+    }
+      return dataresult       
+  } 
+
+  async isUserExist(){
+    let isExist = false;
+    try{
+        const userInfo = await usersCollection.filter({username:this.data})
+        .run(connection)
+        .catch(error => console.log(error));
+        console.log(userInfo._responses.length)
+        if(userInfo._responses.length > 0)
+        {
+          isExist = true
+        }    
+    }catch(e){
+      console.log(e)
+    }
+      return isExist
+  }
+
+}
+
+
+module.exports = User
