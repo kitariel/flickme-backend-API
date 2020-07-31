@@ -69,11 +69,18 @@ class User{
     };
     try{
         const getall = await usersCollection.run(connection)
-        dataresult = {
+        if(getall._responses.length > 0){
+            dataresult = {
+              'success': true,
+              'message': "Successful",
+              'data': getall._responses[0].r
+            }      
+        }else{
+          dataresult = {
             'success': true,
-            'message': "Successful",
-            'data': getall
-    }      
+            'message': "No Data"
+          } 
+        }
     }catch(e){
       console.log(e)
     }
@@ -87,7 +94,6 @@ class User{
       'message': "Failed",
     };
     try{
-      if(this.data.user_Id != "" || this.data.user_Id != undefined ){
         const updateUser = await usersCollection.get(this.data)
         .update(this.dataObject)
         .run(connection)
@@ -96,8 +102,7 @@ class User{
         dataresult = {
             'success': true,
             'message': "User Updated",
-      };
-    }      
+        };
     }catch(e){
       console.log(e)
     }

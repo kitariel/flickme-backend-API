@@ -14,7 +14,7 @@ router.post("/updateUser", userController.apiUpdateUser);
 router.get("/userInfo", userController.apiUserGet);
 router.get("/userAll", userController.apiGetAll);
 
-router.delete("/userById", userController.apiUserDelete);
+router.delete("/userDeleteById", userController.apiUserDelete);
 
 router.get("/apiUserChecker" , userController.apiUserChecker)
 
