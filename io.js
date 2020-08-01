@@ -1,5 +1,5 @@
-const { addUser, userLeft, getCurrentUser, getOnlineUsers } = require('./utils/user');
-const formatMsg = require('./utils/message')
+const { addUser, userLeft, getCurrentUser, getOnlineUsers } = require('./socket-io_utils/user');
+const formatMsg = require('./socket-io_utils/message')
 
 module.exports = (io) => {
     const admin = 'Admin'

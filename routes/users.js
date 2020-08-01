@@ -1,9 +1,12 @@
-var express = require('express');
-var apiRouter = express.Router();
+var express = require("express");
+var router = express.Router();
+const cors = require("cors");
 
-const userController = require('../controllers/userController')
+router.use(cors());
 
-apiRouter.get('/', userController.apiGetUsers)
-apiRouter.post('/', userController.apiAddUser)
+/* GET users listing. */
+router.get("/", function (req, res, next) {
+  res.send("respond with a resource");
+});
 
-module.exports = apiRouter;
+module.exports = router;

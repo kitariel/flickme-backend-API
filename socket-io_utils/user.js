@@ -6,7 +6,9 @@ const addUser = ( {id, username, room, date} ) => {
     // gi butangan lang nako ug slice kay sa local if mag manual search sa chatroom kay makasud gihapon bisag 
     // lapas sa max character sa name
     // sa URL if sa local nya if lapas ang max char kay makita gyapon sa URL pero naka slice na sya sa chatwindow
+    console.log(username)
     username = username.trim().toLowerCase().slice(0, 10);
+    console.log(username)
 
     // 1 username lang sa whole chat app, not per room kay para if mo balhin ang user, dili na pud ma conflict sa username
     const existingUser = users.find(user => user.username === username);
