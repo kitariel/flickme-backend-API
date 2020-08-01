@@ -76,4 +76,5 @@ Go to the original repo
 Click **create pull request** button, add appropriate message, explain what you added removed or changed. Finally, click the create **pull request** button
 
 ## Note
+
 After cloning the repo add your own bin folder and config files as well as the .env config
