@@ -1,6 +1,7 @@
 const r = require("rethinkdb");
 const usersCollection = r.table("users");
 
+
 class User {
   constructor(data, dataObject = null) {
     this.data = data;
@@ -152,3 +153,4 @@ class User {
 }
 
 module.exports = User;
+

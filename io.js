@@ -1,40 +1,70 @@
-const io = require("socket.io")(); // yes, no server arg here; it's not required
-// attach stuff to io
 
-const formatMessage = require("./socket-io_utils/message");
-const { userJoin, getCurrentUser } = require("./socket-io_utils/user");
+const { addUser, userLeft, getCurrentUser, getOnlineUsers } = require('./socket-io_utils/user');
+const formatMsg = require('./socket-io_utils/message')
 
-io.on("connection", (socket) => {
-  console.log("new web socket comnnection");
+module.exports = (io) => {
+    const admin = 'Admin'
 
-  socket.on("joinRoom", ({ username, room }) => {
-    const user = userJoin(socket.id, username, room);
-    socket.join(user.room);
+    // check if connected to server with socket io
+    io.on('connection', (socket) => {
+        console.log(`new connection from: ${socket.id}`)
 
-    // Welcome current user
-    socket.emit("chatFromServer", formatMessage("chatbot", "Welcome"));
+        socket.on('userJoined', (newUser, callback) => {
+            const { error, user } = addUser({ id: socket.id, ...newUser});
 
-    // Broadcast when a user conencts
-    socket.broadcast.emit(
-      "chatFromServer",
-      formatMessage("chatbot", `user has joined the chat`)
-    );
-  });
+            // If username is taken, run alert error sa client
+            if(error) return callback(error);
+            
+            // Join specific room
+            socket.join(user.room)
 
-  // Listen for chat message from client
-  socket.on("chatFromClient", (message) => {
-    console.log(message);
-    const user = getCurrentUser(socket.id);
-    // const fromUser = user.username;
-    socket.broadcast
-      .to(user.room)
-      .emit("chatFromServer", formatMessage(fromUser, message));
-  });
+            // Send Welcome message to current user
+            socket.emit('message', formatMsg(admin, `Welcome to our chatroom, ${user.username}!`))
 
-  // This runs when client disconnect
-  socket.on("disconnect", () => {
-    io.emit("chatFromServer", formatMessage("chatbot", "A user has left the chat"));
-  });
-});
+            // Broadcast message to everyone except the user
+            socket
+                .broadcast
+                .to(user.room)
+                .emit('message', formatMsg(admin, `${user.username} has joined the chatroom.`));
 
-module.exports = io;
+            // Display all users in room
+            io.to(user.room).emit('usersOnline', ({
+                room: user.room,
+                users: getOnlineUsers(user.room)
+            }))
+
+            // no-room-chatroom
+            // io.emit('usersOnline', { users: getOnlineUsers() });
+
+            callback();
+        });
+
+        // Listen for chat messages
+        socket.on('sendMessage', message => {
+            const user = getCurrentUser(socket.id)
+
+            io.to(user.room).emit('message', formatMsg(user.username, message))
+        })
+
+        // Listen when someone is typing a message
+        // socket.on('isTyping', name => {
+        //     const user = getCurrentUser(socket.id)
+
+        //     socket.broadcast.to(user.room).emit('isTyping', name);
+        // });
+
+        // User disconnects
+        socket.on('disconnect', () => {
+            const user = userLeft(socket.id)
+
+            if(user) {
+                io.to(user.room).emit('message', formatMsg(admin, `${user.username} has disconnected.`))
+
+                io.to(user.room).emit('usersOnline', ({
+                    room: user.room,
+                    users: getOnlineUsers(user.room)
+                }))
+            }
+        })
+    });
+}
