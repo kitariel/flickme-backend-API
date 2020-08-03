@@ -1,7 +1,6 @@
 const r = require("rethinkdb");
 const usersCollection = r.table("users");
 
-
 class User {
   constructor(data, dataObject = null) {
     this.data = data;
@@ -36,6 +35,47 @@ class User {
       });
     }
     return dataresult;
+  }
+
+  async login() {
+    let queryResult = {
+      username: "",
+      room: "",
+      status: false,
+      isOnline: false,
+    };
+    // console.log(this.data);
+    try {
+      const user = await usersCollection
+        .filter(this.data)("username")
+        .run(connection);
+      // console.log(user._responses[0].r);
+      let username = user._responses[0].r[0];
+      if (user._responses[0].r) {
+        const room = await this.fetchRoom();
+
+        // queryResult = {
+        //   username,
+        //   room: room,
+
+        // };
+        return room;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async fetchRoom() {
+    try {
+      const room = await usersCollection.filter(this.data)("room").run(connection);
+      // console.log(user._responses[0].r);
+      if (room._responses[0].r) {
+        return room._responses[0].r[0];
+      }
+    } catch (e) {
+      return false;
+    }
   }
 
   //User Get By Id
@@ -153,4 +193,3 @@ class User {
 }
 
 module.exports = User;
-
