@@ -1,9 +1,8 @@
 const r = require("rethinkdb");
 const usersCollection = r.table("users");
 
-
 class User {
-  constructor(data = null, dataObject = null) {
+  constructor(data, dataObject = null) {
     this.data = data;
     this.dataObject = dataObject;
   }
@@ -20,6 +19,7 @@ class User {
 
         let userId = "";
         userId = addUser.generated_keys.toString();
+        // console.log(userId)
 
         dataresult = {
           success: true,
@@ -38,16 +38,57 @@ class User {
     return dataresult;
   }
 
+  async login() {
+    let queryResult = {
+      username: "",
+      room: "",
+      status: false,
+      isOnline: false,
+    };
+    // console.log(this.data);
+    try {
+      const user = await usersCollection
+        .filter(this.data)("username")
+        .run(connection);
+      // console.log(user._responses[0].r);
+      let username = user._responses[0].r[0];
+      if (user._responses[0].r) {
+        const room = await this.fetchRoom();
+
+        // queryResult = {
+        //   username,
+        //   room: room,
+
+        // };
+        return room;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async fetchRoom() {
+    try {
+      const room = await usersCollection.filter(this.data)("room").run(connection);
+      // console.log(user._responses[0].r);
+      if (room._responses[0].r) {
+        return room._responses[0].r[0];
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
   //User Get By Id
-  async getUserById(id) {
+  async getUserById() {
     let dataresult = {
       success: false,
       message: "Failed",
     };
-    // console.log(this.data);
+    console.log(this.data);
     try {
-      if (id != "" || id != undefined) {
-        const getUserInfo = await usersCollection.get(id).run(connection);
+      if (this.data.id != "" || this.data.id != undefined) {
+        const getUserInfo = await usersCollection.get(this.data).run(connection);
         dataresult = {
           success: true,
           message: "Successful",
@@ -87,15 +128,15 @@ class User {
   }
 
   //User Update
-  async userUpdateById(id , dataObject) {
+  async userUpdateById() {
     let dataresult = {
       success: false,
       message: "Failed",
     };
     try {
       const updateUser = await usersCollection
-        .get(id)
-        .update(dataObject)
+        .get(this.data)
+        .update(this.dataObject)
         .run(connection)
         .catch((error) => console.log(error));
 
@@ -110,15 +151,15 @@ class User {
   }
 
   //User Delete
-  async userDeleteById(id) {
+  async userDeleteById() {
     let dataresult = {
       success: false,
       message: "Failed",
     };
     try {
-      if (id != "" || id != undefined) {
+      if (this.data.user_Id != "" || this.data.user_Id != undefined) {
         const deleteUser = await usersCollection
-          .get(id)
+          .get(this.data)
           .delete()
           .run(connection)
           .catch((error) => console.log(error));
@@ -131,14 +172,16 @@ class User {
     } catch (e) {
       console.log(e);
     }
+
     return dataresult;
   }
 
-  async isUserExist(user_name) {
+  async isUserExist() {
     let isExist = false;
+
     try {
       const userInfo = await usersCollection
-        .filter({ username: user_name })
+        .filter({ username: this.data })
         .run(connection)
         .catch((error) => console.log(error));
       console.log(userInfo._responses.length);
@@ -153,4 +196,3 @@ class User {
 }
 
 module.exports = User;
-

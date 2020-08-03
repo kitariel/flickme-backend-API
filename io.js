@@ -1,70 +1,87 @@
-
-const { addUser, userLeft, getCurrentUser, getOnlineUsers } = require('./socket-io_utils/user');
-const formatMsg = require('./socket-io_utils/message')
+const {
+  addUser,
+  userLeft,
+  getCurrentUser,
+  getOnlineUsers,
+} = require("./socket-io_utils/user");
+const { formatMsg, getRoomMessagesFn } = require("./socket-io_utils/message");
 
 module.exports = (io) => {
-    const admin = 'Admin'
+  const admin = "Admin";
 
-    // check if connected to server with socket io
-    io.on('connection', (socket) => {
-        console.log(`new connection from: ${socket.id}`)
+  // check if connected to server with socket io
+  io.on("connection", (socket) => {
+    console.log(`new connection from: ${socket.id}`);
 
-        socket.on('userJoined', (newUser, callback) => {
-            const { error, user } = addUser({ id: socket.id, ...newUser});
+    socket.on("userJoined", async (newUser, callback) => {
+        const { error, user } = addUser({ id: socket.id, ...newUser });
 
-            // If username is taken, run alert error sa client
-            if(error) return callback(error);
-            
-            // Join specific room
-            socket.join(user.room)
+        // If username is taken, run alert error sa client
+        if (error) return callback(error);
 
-            // Send Welcome message to current user
-            socket.emit('message', formatMsg(admin, `Welcome to our chatroom, ${user.username}!`))
+        // Join specific room
+        socket.join(user.room);
 
-            // Broadcast message to everyone except the user
-            socket
-                .broadcast
-                .to(user.room)
-                .emit('message', formatMsg(admin, `${user.username} has joined the chatroom.`));
+        // Send Welcome message to current user
+        socket.emit(
+            "message",
+            formatMsg(admin, `Welcome to our chatroom, ${user.username}!`)
+        );
 
-            // Display all users in room
-            io.to(user.room).emit('usersOnline', ({
-                room: user.room,
-                users: getOnlineUsers(user.room)
-            }))
+        // Broadcast message to everyone except the user
+        socket.broadcast
+            .to(user.room)
+            .emit(
+                "message",
+                formatMsg(admin, `${user.username} has joined the chatroom.`)
+        );
 
-            // no-room-chatroom
-            // io.emit('usersOnline', { users: getOnlineUsers() });
+        // Get all messages in current room
+        socket.emit('getRoomMessages', await (getRoomMessagesFn(user.room)))
 
-            callback();
+        // no-room-chatroom
+        // io.emit('usersOnline', { users: getOnlineUsers() });
+        // Display all users in room
+        io.to(user.room).emit("usersOnline", {
+            room: user.room,
+            users: getOnlineUsers(user.room),
         });
 
-        // Listen for chat messages
-        socket.on('sendMessage', message => {
-            const user = getCurrentUser(socket.id)
+        // no-room-chatroom
+        // io.emit('usersOnline', { users: getOnlineUsers() });
 
-            io.to(user.room).emit('message', formatMsg(user.username, message))
-        })
-
-        // Listen when someone is typing a message
-        // socket.on('isTyping', name => {
-        //     const user = getCurrentUser(socket.id)
-
-        //     socket.broadcast.to(user.room).emit('isTyping', name);
-        // });
-
-        // User disconnects
-        socket.on('disconnect', () => {
-            const user = userLeft(socket.id)
-
-            if(user) {
-                io.to(user.room).emit('message', formatMsg(admin, `${user.username} has disconnected.`))
-
-                io.to(user.room).emit('usersOnline', ({
-                    room: user.room,
-                    users: getOnlineUsers(user.room)
-                }))
-            }
-        })
+        callback();
     });
-}
+
+    // Listen for chat messages
+    socket.on('sendMessage', messageData => {
+        const user = getCurrentUser(socket.id)
+
+        io.to(user.room).emit('message', messageData )
+    })
+
+    // Listen when someone is typing a message
+    // socket.on('isTyping', name => {
+    //     const user = getCurrentUser(socket.id)
+
+    //     socket.broadcast.to(user.room).emit('isTyping', name);
+    // });
+
+    // User disconnects
+    socket.on("disconnect", () => {
+      const user = userLeft(socket.id);
+
+      if (user) {
+        io.to(user.room).emit(
+          "message",
+          formatMsg(admin, `${user.username} has disconnected.`)
+        );
+
+        io.to(user.room).emit("usersOnline", {
+          room: user.room,
+          users: getOnlineUsers(user.room),
+        });
+      }
+    });
+  });
+};

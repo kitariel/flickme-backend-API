@@ -16,6 +16,8 @@ router.get("/userAll", userController.apiGetAll);
 
 router.delete("/userDeleteById", userController.apiUserDelete);
 
-router.get("/apiUserChecker" , userController.apiUserChecker)
+router.get("/apiUserChecker", userController.apiUserChecker);
+
+router.post("/login", userController.apiLogin);
 
 module.exports = router;
