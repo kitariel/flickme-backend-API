@@ -1,5 +1,5 @@
 const { addUser, userLeft, getCurrentUser, getOnlineUsers } = require('./socket-io_utils/user');
-const formatMsg = require('./socket-io_utils/message')
+const { formatMsg, getRoomMessagesFn } = require('./socket-io_utils/message')
 
 module.exports = (io) => {
     const admin = 'Admin'
@@ -8,7 +8,7 @@ module.exports = (io) => {
     io.on('connection', (socket) => {
         console.log(`new connection from: ${socket.id}`)
 
-        socket.on('userJoined', (newUser, callback) => {
+        socket.on('userJoined', async (newUser, callback) => {
             const { error, user } = addUser({ id: socket.id, ...newUser});
 
             // If username is taken, run alert error sa client
@@ -32,6 +32,9 @@ module.exports = (io) => {
                 users: getOnlineUsers(user.room)
             }))
 
+            // Get all messages in current room
+            socket.emit('getRoomMessages', await (getRoomMessagesFn(user.room)))
+
             // no-room-chatroom
             // io.emit('usersOnline', { users: getOnlineUsers() });
 
@@ -39,10 +42,10 @@ module.exports = (io) => {
         });
 
         // Listen for chat messages
-        socket.on('sendMessage', message => {
+        socket.on('sendMessage', messageData => {
             const user = getCurrentUser(socket.id)
 
-            io.to(user.room).emit('message', formatMsg(user.username, message))
+            io.to(user.room).emit('message', messageData )
         })
 
         // Listen when someone is typing a message

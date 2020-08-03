@@ -1,7 +1,7 @@
 const r = require("rethinkdb");
 const usersCollection = r.table("users");
 
-class User{
+class User {
   constructor(data , dataObject = null){
     this.data = data
     this.dataObject = dataObject
@@ -22,17 +22,17 @@ class User{
         userId = addUser.generated_keys.toString()
 
         dataresult = {
-            'success': true,
-            'message': "User Created",
-            'data':userId
-      };
-    }      
+          'success': true,
+          'message': "User Created",
+          'data':userId
+        };
+      }
     }catch(e){
       console.log(e)
       return dataresult = {
         'success': false,
         'message': "Api Fail",
-        'error':e
+        'error':e 
       };
     }
       return dataresult       
@@ -91,13 +91,13 @@ class User{
    async userUpdateById(){
     let dataresult = {
       'success': false,
-      'message': "Failed",
+      'message': "Update Failed",
     };
     try{
-        const updateUser = await usersCollection.get(this.data)
-        .update(this.dataObject)
-        .run(connection)
-        .catch(error => console.log(error));
+        const updateUser = await usersCollection
+          .get(this.data)
+          .update({'isLoggedIn': false})
+          .run(connection)
 
         dataresult = {
             'success': true,
@@ -131,23 +131,25 @@ class User{
       console.log(e)
     }
       return dataresult       
-  } 
+  }
 
   async isUserExist(){
     let isExist = false;
+
     try{
-        const userInfo = await usersCollection.filter({username:this.data})
-        .run(connection)
-        .catch(error => console.log(error));
-        console.log(userInfo._responses.length)
-        if(userInfo._responses.length > 0)
-        {
+        const userInfo = await usersCollection
+          .filter({username:this.data})
+          .run(connection)
+          .catch(error => console.log(error));
+
+        if(userInfo._responses.length > 0) {
           isExist = true
-        }    
-    }catch(e){
+        }
+    } catch (e) {
       console.log(e)
     }
-      return isExist
+    
+    return isExist
   }
 
 }

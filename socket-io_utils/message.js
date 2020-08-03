@@ -1,9 +1,17 @@
-function formatMsg(username, message) {
+const Message = require('../models/Messages-models')
+
+const formatMsg = (sender, message) => {
   return {
-      username,
+      sender,
       message,
-      time: new Date().toLocaleTimeString()
+      date: new Date().toISOString()
   }
 }
 
-module.exports = formatMsg
+const getRoomMessagesFn = async (room) => {
+    let currentUser = new Message(room)
+    const result = await currentUser.getMessages()
+    return result
+}
+
+module.exports = { formatMsg, getRoomMessagesFn }

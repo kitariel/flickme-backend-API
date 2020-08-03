@@ -1,32 +1,32 @@
 let Users = require("../models/Users-models");
-const User = require("../models/Users-models");
 
 exports.apiCreate = async (req , res) => {
   let createUser = new Users(req.body)
-  let isExist = new User(req.body.username)
+  let isExist = new Users(req.body.username)
   const resultIfExist = await isExist.isUserExist()
   
   let resultContainer = []
-    if(!resultIfExist){
-      const result = await createUser.create().catch(err => console.log(err))    
-      if(result.success){
-          let objectRes = {
-            isAccess:true,
-            results:result
-          }
-          resultContainer.push(objectRes)
-          res.json(resultContainer)
-      }else{
-          res.json(result.message , result.error)
-      }
+  
+  if(!resultIfExist){
+    const result = await createUser.create().catch(err => console.log(err))    
+    if(result.success){
+        let objectRes = {
+          isAccess:true,
+          results:result
+        }
+        resultContainer.push(objectRes)
+        res.json(resultContainer)
     }else{
-      let objectRes = {
-        isAccess:false,
-        results:'No User Created'
-      }
-      resultContainer.push(objectRes)
-      res.json(resultContainer)
+        res.json(result.message , result.error)
     }
+  }else{
+    let objectRes = {
+      isAccess:false,
+      results:'No User Created'
+    }
+    resultContainer.push(objectRes)
+    res.json(resultContainer)
+  }
   
 }
 
