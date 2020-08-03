@@ -47,12 +47,14 @@ class User {
     // console.log(this.data);
     try {
       const user = await usersCollection
-        .filter(this.data)("username")
+        .filter(this.data.username)("username")
         .run(connection);
-      // console.log(user._responses[0].r);
+      console.log(user._responses[0].r);
       let username = user._responses[0].r[0];
+      console.log(username)
       if (user._responses[0].r) {
         const room = await this.fetchRoom();
+        // console.log(room)
 
         // queryResult = {
         //   username,
@@ -72,6 +74,7 @@ class User {
       // console.log(user._responses[0].r);
       if (room._responses[0].r) {
         return room._responses[0].r[0];
+        // return 'test result'
       }
     } catch (e) {
       return false;
