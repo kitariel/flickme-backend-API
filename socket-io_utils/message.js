@@ -1,11 +1,9 @@
-const moment = require("moment");
-
-function formatMessage(username, text) {
+function formatMsg(username, message) {
   return {
-    username,
-    text,
-    time: moment().format("h:mm a"),
-  };
+      username,
+      message,
+      time: new Date().toLocaleTimeString()
+  }
 }
 
-module.exports = formatMessage;
+module.exports = formatMsg
