@@ -1,7 +1,5 @@
 let Users = require("../models/Users-models");
 const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
-dotenv.config();
 
 exports.apiCreate = async (req, res) => {
   let createUser = new Users(req.body);

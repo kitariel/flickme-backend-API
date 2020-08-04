@@ -1,3 +1,4 @@
+const UsersModel = require('./models/Users-models')
 const {
   addUser,
   userLeft,
@@ -5,7 +6,10 @@ const {
   getOnlineUsers,
 } = require("./socket-io_utils/user");
 const { formatMsg, getRoomMessagesFn } = require("./socket-io_utils/message");
+const User = require('./models/Users-models');
 
+
+let userId = null
 module.exports = (io) => {
   const admin = "Admin";
 
@@ -14,12 +18,21 @@ module.exports = (io) => {
     console.log(`new connection from: ${socket.id}`);
 
     socket.on("userJoined", async (newUser, callback) => {
-        const { error, user } = addUser({ id: socket.id, ...newUser });
 
+
+        //debug why is always keep getting the last user_id log out
+        userId = newUser.id
+        const { error, user } = await addUser({...newUser });
+
+        let userAll = new UsersModel(data = null)
+        const dataTemp = await userAll.getAll()
+        // console.log(dataTemp.data)
         // If username is taken, run alert error sa client
-        if (error) return callback(error);
+        // console.log("user")
+        // console.log(user)
 
-        // Join specific room
+
+        if (error) return callback(error);
         socket.join(user.room);
 
         // Send Welcome message to current user
@@ -44,7 +57,7 @@ module.exports = (io) => {
         // Display all users in room
         io.to(user.room).emit("usersOnline", {
             room: user.room,
-            users: getOnlineUsers(user.room),
+            users: await getOnlineUsers(user.room),
         });
 
         // no-room-chatroom
@@ -54,9 +67,10 @@ module.exports = (io) => {
     });
 
     // Listen for chat messages
-    socket.on('sendMessage', messageData => {
-        const user = getCurrentUser(socket.id)
-
+    socket.on('sendMessage', async (messageData) => {
+        const user = await getCurrentUser(messageData.userId)
+        // console.log("Here +>>>")
+        // console.log(user)
         io.to(user.room).emit('message', messageData )
     })
 
@@ -68,10 +82,14 @@ module.exports = (io) => {
     // });
 
     // User disconnects
-    socket.on("disconnect", () => {
-      const user = userLeft(socket.id);
+    socket.on("disconnect", async () => {
+      console.log('userId.id->>>>>>')///
+      console.log(userId)///
+      // const user = userLeft(socket.id);
+      const user = await userLeft(userId);
 
       if (user) {
+        
         io.to(user.room).emit(
           "message",
           formatMsg(admin, `${user.username} has disconnected.`)
@@ -79,7 +97,7 @@ module.exports = (io) => {
 
         io.to(user.room).emit("usersOnline", {
           room: user.room,
-          users: getOnlineUsers(user.room),
+          users: await getOnlineUsers(user.room),
         });
       }
     });

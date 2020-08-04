@@ -10,7 +10,7 @@ class Message {
 
     async getMessages() {
         const result = await messageCollection
-            .orderBy({index: 'date'})
+            .orderBy({index:'date'})
             .filter({'room': this.data})
             .run(connection)
 

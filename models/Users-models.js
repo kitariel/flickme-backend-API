@@ -48,14 +48,12 @@ class User {
     // console.log(this.data);
     try {
       const user = await usersCollection
-        .filter(this.data.username)("username")
+        .filter(this.data)("username")
         .run(connection);
-      console.log(user._responses[0].r);
+      // console.log(user._responses[0].r);
       let username = user._responses[0].r[0];
-      console.log(username)
       if (user._responses[0].r) {
         const room = await this.fetchRoom();
-        // console.log(room)
 
         // queryResult = {
         //   username,
@@ -75,7 +73,6 @@ class User {
       // console.log(user._responses[0].r);
       if (room._responses[0].r) {
         return room._responses[0].r[0];
-        // return 'test result'
       }
     } catch (e) {
       return false;
@@ -88,7 +85,7 @@ class User {
       success: false,
       message: "Failed",
     };
-    console.log(this.data);
+    // console.log(this.data);
     try {
       if (this.data.id != "" || this.data.id != undefined) {
         const getUserInfo = await usersCollection.get(this.data).run(connection);
@@ -129,6 +126,32 @@ class User {
     }
     return dataresult;
   }
+
+    //User All
+    async getAllUserByFilter(isOnlineParams , getRoom) {
+      let dataresult = {
+        success: false,
+        message: "Failed",
+      };
+      try {
+        const getall = await usersCollection.filter({isOnline:isOnlineParams , room:getRoom}).run(connection);
+        if (getall._responses.length > 0) {
+          dataresult = {
+            success: true,
+            message: "Successful",
+            data: getall._responses[0].r,
+          };
+        } else {
+          dataresult = {
+            success: true,
+            message: "No Data",
+          };
+        }
+      } catch (e) {
+        console.log(e);
+      }
+      return dataresult;
+    }
 
   //User Update
   async userUpdateById() {
@@ -187,7 +210,7 @@ class User {
         .filter({ username: this.data })
         .run(connection)
         .catch((error) => console.log(error));
-      console.log(userInfo._responses.length);
+      // console.log(userInfo._responses.length);
       if (userInfo._responses.length > 0) {
         isExist = true;
       }
@@ -196,6 +219,7 @@ class User {
     }
     return isExist;
   }
+
 }
 
 module.exports = User;
