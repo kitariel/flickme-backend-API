@@ -10,6 +10,7 @@ const User = require('./models/Users-models');
 
 
 let userId = null
+let testContainer = []
 module.exports = (io) => {
   const admin = "Admin";
 
@@ -19,7 +20,7 @@ module.exports = (io) => {
 
     socket.on("userJoined", async (newUser, callback) => {
 
-
+      testContainer.push(newUser.id)
         //debug why is always keep getting the last user_id log out
         userId = newUser.id
         const { error, user } = await addUser({...newUser });
