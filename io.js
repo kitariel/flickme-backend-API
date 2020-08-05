@@ -10,20 +10,17 @@ const User = require('./models/Users-models');
 
 
 let userId = null
-let testContainer = []
 module.exports = (io) => {
   const admin = "Admin";
 
   // check if connected to server with socket io
   io.on("connection", (socket) => {
     console.log(`new connection from: ${socket.id}`);
-
     socket.on("userJoined", async (newUser, callback) => {
-
-      testContainer.push(newUser.id)
+          console.log(`userJoined: ${socket.id}`)
         //debug why is always keep getting the last user_id log out
         userId = newUser.id
-        const { error, user } = await addUser({...newUser });
+        const { error, user } = await addUser({socketid:socket.id ,...newUser });
 
         let userAll = new UsersModel(data = null)
         const dataTemp = await userAll.getAll()
@@ -84,23 +81,26 @@ module.exports = (io) => {
 
     // User disconnects
     socket.on("disconnect", async () => {
-      console.log('userId.id->>>>>>')///
-      console.log(userId)///
-      // const user = userLeft(socket.id);
-      const user = await userLeft(userId);
 
-      if (user) {
+
+      // if(userId != null){
+      const user = await userLeft(socket.id);
+      const dataUser = user[0]
+      // console.log('-?>>>>>>>>>>>>>>>')
+      // console.log(dataUser)
+      if (dataUser) {
         
-        io.to(user.room).emit(
+        io.to(dataUser.room).emit(
           "message",
-          formatMsg(admin, `${user.username} has disconnected.`)
+          formatMsg(admin, `${dataUser.username} has disconnected.`)
         );
 
         io.to(user.room).emit("usersOnline", {
-          room: user.room,
-          users: await getOnlineUsers(user.room),
+          room: dataUser.room,
+          users: await getOnlineUsers(dataUser.room),
         });
       }
+
     });
   });
 };
